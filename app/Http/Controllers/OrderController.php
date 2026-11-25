@@ -82,6 +82,38 @@ class OrderController extends Controller
         return redirect('/orders/complete/' . $result['order']->id);
     }
 
+    public function cancel($id)
+    {
+        $result = DB::transaction(function () use ($id) {
+            $order = Order::with('items')->lockForUpdate()->findOrFail($id);
+
+            if ($order->status === 'cancelled') {
+                return [
+                    'ok' => false,
+                    'message' => 'この注文はすでにキャンセルされています。',
+                ];
+            }
+
+            foreach ($order->items as $item) {
+                $product = Product::lockForUpdate()->find($item->product_id);
+                if ($product) {
+                    $product->stock += $item->quantity;
+                    $product->save();
+                }
+            }
+
+            $order->status = 'cancelled';
+            $order->save();
+
+            return [
+                'ok' => true,
+                'message' => '注文をキャンセルし、在庫を元に戻しました。',
+            ];
+        });
+
+        return redirect('/orders/' . $id)->with('success', $result['message']);
+    }
+
     public function complete($id)
     {
         $order = Order::with('items')->findOrFail($id);

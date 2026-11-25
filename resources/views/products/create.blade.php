@@ -1,29 +1,14 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>商品登録 - ECサイト</title>
-    <style>
-        body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
-        .form-group { margin-bottom: 16px; }
-        label { display: block; font-weight: bold; margin-bottom: 6px; }
-        input[type="text"], input[type="number"], textarea {
-            width: 100%; box-sizing: border-box; padding: 8px 12px;
-            border: 1px solid #ccc; border-radius: 6px; font-size: 1em;
-        }
-        textarea { min-height: 100px; }
-        .error-box { background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; }
-        .actions { display: flex; gap: 10px; align-items: center; margin-top: 20px; }
-        .btn { display: inline-block; text-decoration: none; color: #333; border: 1px solid #ccc; padding: 8px 14px; border-radius: 6px; background: #fff; cursor: pointer; }
-        .btn-primary { background: #111; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; cursor: pointer; }
-    </style>
-</head>
-<body>
-    <h1>新規商品登録</h1>
+@extends('layouts.app')
+
+@section('title', '商品新規登録 - Cytech EC')
+
+@section('content')
+<div style="max-width: 640px; margin: 0 auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 28px;">
+    <h1 style="margin-top: 0;">商品新規登録</h1>
 
     @if ($errors->any())
-        <div class="error-box">
-            <ul>
+        <div style="background: #fef2f2; border: 1px solid #fca5a5; color: #b91c1c; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px;">
+            <ul style="margin: 0; padding-left: 20px;">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -31,33 +16,46 @@
         </div>
     @endif
 
-    <form action="/products" method="POST">
+    <form action="/products" method="POST" enctype="multipart/form-data">
         @csrf
 
-        <div class="form-group">
-            <label for="name">商品名</label>
-            <input type="text" id="name" name="name" value="{{ old('name') }}" required>
+        <div style="margin-bottom: 16px;">
+            <label for="name" style="display: block; font-weight: bold; margin-bottom: 6px;">商品名</label>
+            <input type="text" id="name" name="name" value="{{ old('name') }}" required
+                   style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
         </div>
 
-        <div class="form-group">
-            <label for="price">価格（円）</label>
-            <input type="number" id="price" name="price" value="{{ old('price', 1000) }}" min="0" required>
+        <div style="margin-bottom: 16px;">
+            <label for="price" style="display: block; font-weight: bold; margin-bottom: 6px;">価格（円）</label>
+            <input type="number" id="price" name="price" value="{{ old('price', 1000) }}" min="0" required
+                   style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
         </div>
 
-        <div class="form-group">
-            <label for="stock">在庫数</label>
-            <input type="number" id="stock" name="stock" value="{{ old('stock', 10) }}" min="0" required>
+        <div style="margin-bottom: 16px;">
+            <label for="stock" style="display: block; font-weight: bold; margin-bottom: 6px;">在庫数</label>
+            <input type="number" id="stock" name="stock" value="{{ old('stock', 10) }}" min="0" required
+                   style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">
         </div>
 
-        <div class="form-group">
-            <label for="description">商品説明</label>
-            <textarea id="description" name="description">{{ old('description') }}</textarea>
+        <div style="margin-bottom: 16px;">
+            <label for="image" style="display: block; font-weight: bold; margin-bottom: 6px;">商品画像（任意・2MBまで）</label>
+            <input type="file" id="image" name="image" accept="image/*">
         </div>
 
-        <div class="actions">
-            <button type="submit" class="btn-primary">登録する</button>
-            <a href="/products" class="btn">← 商品一覧に戻る</a>
+        <div style="margin-bottom: 20px;">
+            <label for="description" style="display: block; font-weight: bold; margin-bottom: 6px;">商品説明</label>
+            <textarea id="description" name="description" rows="4"
+                      style="width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1; border-radius: 6px;">{{ old('description') }}</textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <button type="submit" style="background: #2563eb; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                登録する
+            </button>
+            <a href="/mypage" style="background: #6b7280; color: #fff; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold;">
+                戻る
+            </a>
         </div>
     </form>
-</body>
-</html>
+</div>
+@endsection
