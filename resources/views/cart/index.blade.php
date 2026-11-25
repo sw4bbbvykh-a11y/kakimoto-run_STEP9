@@ -6,7 +6,10 @@
     <style>
         body { font-family: sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; }
         .message { background: #eefbf3; border: 1px solid #2e8b57; color: #1f5c39; padding: 12px 16px; border-radius: 6px; margin-bottom: 20px; }
-        .item { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; }
+        .item { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+        .item-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .qty-form { display: flex; gap: 6px; align-items: center; }
+        .qty-form input[type="number"] { width: 64px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 6px; }
         .total { font-size: 1.3em; font-weight: bold; margin: 24px 0; }
         .actions { display: flex; gap: 12px; align-items: center; margin-top: 16px; }
         .btn { display: inline-block; text-decoration: none; color: #333; border: 1px solid #ccc; padding: 8px 14px; border-radius: 6px; background: #fff; cursor: pointer; }
@@ -31,10 +34,17 @@
                     <p>単価：¥{{ number_format($item['price']) }} × {{ $item['quantity'] }}個</p>
                     <p>小計：¥{{ number_format($item['price'] * $item['quantity']) }}</p>
                 </div>
-                <form action="/cart/remove/{{ $item['id'] }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-danger">削除</button>
-                </form>
+                <div class="item-actions">
+                    <form action="/cart/update/{{ $item['id'] }}" method="POST" class="qty-form">
+                        @csrf
+                        <input type="number" name="quantity" value="{{ $item['quantity'] }}" min="0">
+                        <button type="submit" class="btn">更新</button>
+                    </form>
+                    <form action="/cart/remove/{{ $item['id'] }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">削除</button>
+                    </form>
+                </div>
             </div>
         @endforeach
 

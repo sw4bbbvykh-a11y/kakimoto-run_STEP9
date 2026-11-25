@@ -31,11 +31,20 @@ class OrderController extends Controller
             return redirect('/cart')->with('success', 'カートが空のため注文できません。');
         }
 
-        $order = DB::transaction(function () use ($cart) {
+        $result = DB::transaction(function () use ($cart) {
             $total = 0;
+            $products = [];
 
             foreach ($cart as $item) {
-                $total += $item['price'] * $item['quantity'];
+                $product = Product::lockForUpdate()->find($item['id']);
+                if (!$product || $product->stock < $item['quantity']) {
+                    return [
+                        'ok' => false,
+                        'message' => ($item['name'] ?? '商品') . ' の在庫が不足しているため注文できません。',
+                    ];
+                }
+                $products[$item['id']] = $product;
+                $total += $product->price * $item['quantity'];
             }
 
             $order = Order::create([
@@ -44,27 +53,33 @@ class OrderController extends Controller
             ]);
 
             foreach ($cart as $item) {
+                $product = $products[$item['id']];
+
                 OrderItem::create([
                     'order_id' => $order->id,
-                    'product_id' => $item['id'],
-                    'product_name' => $item['name'],
-                    'price' => $item['price'],
+                    'product_id' => $product->id,
+                    'product_name' => $product->name,
+                    'price' => $product->price,
                     'quantity' => $item['quantity'],
                 ]);
 
-                $product = Product::find($item['id']);
-                if ($product) {
-                    $product->stock = max(0, $product->stock - $item['quantity']);
-                    $product->save();
-                }
+                $product->stock -= $item['quantity'];
+                $product->save();
             }
 
-            return $order;
+            return [
+                'ok' => true,
+                'order' => $order,
+            ];
         });
+
+        if (!$result['ok']) {
+            return redirect('/cart')->with('success', $result['message']);
+        }
 
         session()->forget('cart');
 
-        return redirect('/orders/complete/' . $order->id);
+        return redirect('/orders/complete/' . $result['order']->id);
     }
 
     public function complete($id)
